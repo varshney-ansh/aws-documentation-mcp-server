@@ -395,15 +395,15 @@ async def recommend(
     return results
 
 
-def main():
-    """Run the MCP server with CLI argument support."""
-    import os
-    logger.info('Starting AWS Documentation MCP Server')
+# def main():
+#     """Run the MCP server with CLI argument support."""
+#     import os
+#     logger.info('Starting AWS Documentation MCP Server')
     
-    # Only run mcp.run() when not deployed to fastmcp.cloud
-    # fastmcp.cloud manages the event loop automatically
-    if os.getenv('FASTMCP_CLOUD') != 'true':
-        mcp.run(transport='streamable-http')
+#     # Only run mcp.run() when not deployed to fastmcp.cloud
+#     # fastmcp.cloud manages the event loop automatically
+#     if os.getenv('FASTMCP_CLOUD') != 'true':
+#         mcp.run(transport='streamable-http')
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
