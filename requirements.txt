@@ -1,0 +1,6 @@
+httpx
+loguru
+pydantic
+markdownify
+mcp
+mangum

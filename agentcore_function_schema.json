@@ -1,0 +1,73 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "mcp_aws_documenta_read_documentation",
+      "description": "Fetch and convert an AWS documentation page to markdown format. URL must be from docs.aws.amazon.com domain and end with .html. For long documents, you can make multiple calls with different start_index values to retrieve the entire content in chunks.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to read"
+          },
+          "max_length": {
+            "type": "integer",
+            "description": "Maximum number of characters to return",
+            "default": 5000,
+            "minimum": 1,
+            "maximum": 999999
+          },
+          "start_index": {
+            "type": "integer",
+            "description": "Starting character index for paginated reading",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": ["url"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "mcp_aws_documenta_search_documentation",
+      "description": "Search AWS documentation using the official AWS Documentation Search API. Use specific technical terms rather than general phrases, include service names to narrow results, and use quotes for exact phrase matching.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_phrase": {
+            "type": "string",
+            "description": "Search phrase to use"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 50
+          }
+        },
+        "required": ["search_phrase"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "mcp_aws_documenta_recommend",
+      "description": "Get content recommendations for an AWS documentation page. Provides recommendations for related AWS documentation pages based on a given URL. The recommendations include four categories: Highly Rated, New, Similar, and Journey pages.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to get recommendations for"
+          }
+        },
+        "required": ["url"]
+      }
+    }
+  }
+]

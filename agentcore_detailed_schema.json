@@ -1,0 +1,297 @@
+{
+  "schema_version": "1.0.0",
+  "mcp_server": {
+    "name": "awslabs.aws-documentation-mcp-server",
+    "version": "1.0.0",
+    "description": "AWS Documentation MCP Server - Provides tools to access public AWS documentation, search for content, and get recommendations",
+    "author": "AWS Labs",
+    "license": "Apache-2.0",
+    "transport": "streamable-http",
+    "default_configuration": {
+      "host": "0.0.0.0",
+      "port": 8000,
+      "log_level": "INFO",
+      "debug": false
+    }
+  },
+  "tools": [
+    {
+      "name": "mcp_aws_documenta_read_documentation",
+      "display_name": "Read AWS Documentation",
+      "category": "documentation",
+      "description": "Fetch and convert an AWS documentation page to markdown format.",
+      "long_description": "This tool retrieves the content of an AWS documentation page and converts it to markdown format. For long documents, you can make multiple calls with different start_index values to retrieve the entire content in chunks. URL must be from the docs.aws.amazon.com domain and must end with .html.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to read",
+            "format": "uri",
+            "pattern": "^https?://docs\\.aws\\.amazon\\.com/.*\\.html$",
+            "examples": [
+              "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html",
+              "https://docs.aws.amazon.com/lambda/latest/dg/lambda-invocation.html"
+            ]
+          },
+          "max_length": {
+            "type": "integer",
+            "description": "Maximum number of characters to return.",
+            "default": 5000,
+            "minimum": 1,
+            "maximum": 999999
+          },
+          "start_index": {
+            "type": "integer",
+            "description": "Starting character index for paginated reading.",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": ["url"]
+      },
+      "returns": {
+        "type": "string",
+        "description": "Markdown formatted content of the AWS documentation page",
+        "format": "markdown"
+      },
+      "usage_examples": [
+        {
+          "description": "Read a complete S3 documentation page",
+          "parameters": {
+            "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html"
+          }
+        },
+        {
+          "description": "Read with pagination for large documents",
+          "parameters": {
+            "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-invocation.html",
+            "max_length": 10000,
+            "start_index": 0
+          }
+        }
+      ],
+      "rate_limits": {
+        "requests_per_minute": 60,
+        "concurrent_requests": 10
+      },
+      "error_handling": {
+        "invalid_url": "Returns error if URL is not from docs.aws.amazon.com or doesn't end with .html",
+        "network_error": "Returns error message if unable to fetch content",
+        "parsing_error": "Returns error message if unable to parse HTML content"
+      }
+    },
+    {
+      "name": "mcp_aws_documenta_search_documentation",
+      "display_name": "Search AWS Documentation",
+      "category": "search",
+      "description": "Search AWS documentation using the official AWS Documentation Search API.",
+      "long_description": "This tool searches across all AWS documentation for pages matching your search phrase. Use specific technical terms rather than general phrases, include service names to narrow results, and use quotes for exact phrase matching.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_phrase": {
+            "type": "string",
+            "description": "Search phrase to use",
+            "minLength": 1,
+            "maxLength": 500,
+            "examples": [
+              "S3 bucket versioning",
+              "AWS Lambda function URLs",
+              "EC2 instance types"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 50
+          }
+        },
+        "required": ["search_phrase"]
+      },
+      "returns": {
+        "type": "array",
+        "description": "Array of search results",
+        "items": {
+          "type": "object",
+          "properties": {
+            "rank_order": {
+              "type": "integer",
+              "description": "Relevance ranking (lower is more relevant)"
+            },
+            "url": {
+              "type": "string",
+              "description": "Documentation page URL"
+            },
+            "title": {
+              "type": "string",
+              "description": "Page title"
+            },
+            "query_id": {
+              "type": "string",
+              "description": "Unique identifier for this search query"
+            },
+            "context": {
+              "type": "string",
+              "description": "Brief excerpt or summary",
+              "nullable": true
+            }
+          }
+        }
+      },
+      "usage_examples": [
+        {
+          "description": "Search for S3 bucket policies",
+          "parameters": {
+            "search_phrase": "S3 bucket policy examples"
+          }
+        },
+        {
+          "description": "Limited search for Lambda documentation",
+          "parameters": {
+            "search_phrase": "AWS Lambda layers",
+            "limit": 5
+          }
+        }
+      ],
+      "rate_limits": {
+        "requests_per_minute": 30,
+        "concurrent_requests": 5
+      }
+    },
+    {
+      "name": "mcp_aws_documenta_recommend",
+      "display_name": "Get AWS Documentation Recommendations",
+      "category": "recommendations",
+      "description": "Get content recommendations for an AWS documentation page.",
+      "long_description": "This tool provides recommendations for related AWS documentation pages based on a given URL. Use it to discover additional relevant content that might not appear in search results. The recommendations include four categories: Highly Rated, New, Similar, and Journey pages.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to get recommendations for",
+            "format": "uri",
+            "pattern": "^https?://docs\\.aws\\.amazon\\.com/",
+            "examples": [
+              "https://docs.aws.amazon.com/AmazonS3/latest/userguide/",
+              "https://docs.aws.amazon.com/lambda/latest/dg/"
+            ]
+          }
+        },
+        "required": ["url"]
+      },
+      "returns": {
+        "type": "array",
+        "description": "Array of recommendation results",
+        "items": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Documentation page URL"
+            },
+            "title": {
+              "type": "string",
+              "description": "Page title"
+            },
+            "context": {
+              "type": "string",
+              "description": "Brief description",
+              "nullable": true
+            }
+          }
+        }
+      },
+      "usage_examples": [
+        {
+          "description": "Get recommendations for S3 documentation",
+          "parameters": {
+            "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/"
+          }
+        }
+      ],
+      "rate_limits": {
+        "requests_per_minute": 30,
+        "concurrent_requests": 5
+      }
+    }
+  ],
+  "capabilities": {
+    "search": {
+      "enabled": true,
+      "description": "Full-text search across AWS documentation",
+      "api_endpoint": "https://proxy.search.docs.aws.amazon.com/search"
+    },
+    "recommendations": {
+      "enabled": true,
+      "description": "Content recommendations based on page relationships",
+      "api_endpoint": "https://contentrecs-api.docs.aws.amazon.com/v1/recommendations"
+    },
+    "content_retrieval": {
+      "enabled": true,
+      "description": "Fetch and convert documentation pages to markdown"
+    },
+    "pagination": {
+      "enabled": true,
+      "description": "Support for reading large documents in chunks"
+    }
+  },
+  "environment_configuration": {
+    "variables": {
+      "FASTMCP_HOST": {
+        "description": "Override default host",
+        "type": "string",
+        "default": "0.0.0.0"
+      },
+      "FASTMCP_PORT": {
+        "description": "Override default port",
+        "type": "integer",
+        "default": 8000
+      },
+      "FASTMCP_LOG_LEVEL": {
+        "description": "Set logging level",
+        "type": "string",
+        "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        "default": "INFO"
+      },
+      "FASTMCP_DEBUG": {
+        "description": "Enable debug mode",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  "dependencies": {
+    "runtime": {
+      "python": ">=3.8",
+      "packages": {
+        "pydantic": ">=2.0.0",
+        "httpx": ">=0.25.0",
+        "beautifulsoup4": ">=4.12.0",
+        "loguru": ">=0.7.0",
+        "mcp": ">=1.0.0"
+      }
+    }
+  },
+  "supported_domains": [
+    "docs.aws.amazon.com"
+  ],
+  "output_formats": [
+    "markdown",
+    "json"
+  ],
+  "security": {
+    "authentication": "none",
+    "authorization": "none",
+    "data_privacy": "Public AWS documentation only",
+    "rate_limiting": true
+  },
+  "monitoring": {
+    "health_check_endpoint": "/health",
+    "metrics_endpoint": "/metrics",
+    "logging": "structured_json"
+  }
+}
