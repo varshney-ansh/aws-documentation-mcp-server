@@ -19,20 +19,39 @@ import re
 import uuid
 
 # Import models
-from awslabs.aws_documentation_mcp_server.models import (
-    RecommendationResult,
-    SearchResult,
-)
-from awslabs.aws_documentation_mcp_server.server_utils import (
-    DEFAULT_USER_AGENT,
-    add_search_result_cache_item,
-    read_documentation_impl,
-)
+try:
+    # Prefer relative imports when running as a package/module
+    from .models import (
+        RecommendationResult,
+        SearchResult,
+    )
+    from .server_utils import (
+        DEFAULT_USER_AGENT,
+        add_search_result_cache_item,
+        read_documentation_impl,
+    )
 
-# Import utility functions
-from awslabs.aws_documentation_mcp_server.util import (
-    parse_recommendation_results,
-)
+    # Import utility functions
+    from .util import (
+        parse_recommendation_results,
+    )
+except ImportError:
+    # Fallback for running this file directly (python server_aws.py)
+    import os
+    import sys
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+    from awslabs.aws_documentation_mcp_server.models import (
+        RecommendationResult,
+        SearchResult,
+    )
+    from awslabs.aws_documentation_mcp_server.server_utils import (
+        DEFAULT_USER_AGENT,
+        add_search_result_cache_item,
+        read_documentation_impl,
+    )
+    from awslabs.aws_documentation_mcp_server.util import (
+        parse_recommendation_results,
+    )
 from loguru import logger
 from mcp.server.fastmcp import Context, FastMCP
 from pydantic import Field
