@@ -199,10 +199,14 @@ async def get_available_services(
 
 def main():
     """Run the MCP server with CLI argument support."""
+    import os
     # Log startup information
     logger.info('Starting AWS China Documentation MCP Server')
 
-    mcp.run()
+    # Only run mcp.run() when not deployed to fastmcp.cloud
+    # fastmcp.cloud manages the event loop automatically
+    if os.getenv('FASTMCP_CLOUD') != 'true':
+        mcp.run()
 
 
 if __name__ == '__main__':
